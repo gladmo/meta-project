@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-一套面向由 AI 智能体参与构建的仓库的脚手架：分层常驻指令（[AGENTS.md](AGENTS.md)）、带字数预算的分层双语文档、RFC 风格的决策记录（[Agent Note](.agents/notes/README.md)）、按需加载的[技能](.agents/skills/pre-push-checks/SKILL.md)，以及零依赖的验证[门](scripts/run-gates.mjs)——结构提炼自 [deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)，天然与语言无关。套用到新项目的完整步骤由 [TEMPLATE.md](TEMPLATE.md) 负责。
+一套面向由 AI 智能体参与构建的仓库的脚手架：分层常驻指令（[AGENTS.md](AGENTS.md)）、带字数预算的分层双语文档、RFC 风格的决策记录（[Agent Note](.agents/notes/README.md)）、按需加载的[技能](.agents/skills/pre-push-checks/SKILL.md)、零依赖的验证[门](scripts/run-gates.mjs)，以及可选的双语文档网站（[website/AGENTS.md](website/AGENTS.md)）——结构提炼自 [deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)，天然与语言无关。套用到新项目的完整步骤由 [TEMPLATE.md](TEMPLATE.md) 负责。
 
 ## 从这里开始
 

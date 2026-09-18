@@ -13,6 +13,7 @@ docs/                      Tiered documentation and its standard (docs/AGENTS.md
 .agents/notes/             Decision records: proposed / implemented / rejected / archived
 .agents/skills/            Reusable agent workflows (pre-push checks, code review)
 scripts/                   Zero-dependency Node gates + run-gates aggregator
+website/                   Optional bilingual documentation website (website/AGENTS.md)
 lefthook.yml               Git-hook wiring template (optional)
 .claude/skills             Symlink exposing skills to Claude Code
 ```
@@ -24,6 +25,7 @@ lefthook.yml               Git-hook wiring template (optional)
 3. Run `node scripts/run-gates.mjs`; the template passes its own gates, and it must still pass after your edits.
 4. Optional: install [lefthook](https://github.com/evilmartians/lefthook) and run `lefthook install`, or wire `node scripts/run-gates.mjs` into your existing hooks.
 5. Prune tiers you do not need: `docs/postmortem/`, `docs/modules/`, and `docs/user/` are optional; remove them and their budget entries together.
+6. Optional: documentation website — fill the `TODO(template)` placeholders in `website/site.mjs`, then `cd website && npm install` (any npm-compatible package manager works; the website is self-contained and never adds a root package manifest). Need no docs site? Delete the whole `website/` directory.
 
 ## How the pieces fit
 
@@ -35,6 +37,7 @@ lefthook.yml               Git-hook wiring template (optional)
 | Agent Notes | RFC-style decision records with lifecycle, classification, and a mandatory alternatives-considered section |
 | Skills | Reusable workflows with YAML frontmatter, loaded on demand |
 | Gates | Deterministic checks (`verify-*.mjs`) aggregated by `scripts/run-gates.mjs` |
+| `website/` | Optional VitePress site: a publication manifest projects the `docs/` pairs into a Chinese-root and `/en` site, with raw-Markdown twins and `llms.txt` ([website/AGENTS.md](website/AGENTS.md)) |
 
 ## Bilingual convention
 
@@ -52,11 +55,13 @@ Human-facing documents are `.md` + `.zh.md` pairs that update together and mirro
 | `node scripts/verify-agent-note-classification.mjs` | Lifecycle and class folders follow the closed tree |
 | `node scripts/run-gates.mjs` | All of the above, sequentially |
 
-All gates run on Node ≥ 18 with no dependencies and resolve the repository root from their own location.
+All gates run on Node ≥ 18 with no dependencies and resolve the repository root from their own location. The optional documentation website stays outside `run-gates` on purpose — it needs its own dependencies — so check it with `npm --prefix website run build` ([website/AGENTS.md](website/AGENTS.md)).
 
 ## Differences from the source project
 
 The template drops the `.i18n.yaml` sidecars, generated catalogs, translation-pairing machinery, and TypeScript-specific gates of the source; the lightweight `verify-doc-pairs` gate replaces the sidecar consistency check. Everything else — the tier taxonomy, the Agent Note lifecycle, the evidence-matching discipline — is preserved in language-agnostic form.
+
+The website tier ports the source project's documentation site with its projection architecture — publication manifest, disposable `.generated/` tree, per-route raw-Markdown twins, `llms.txt` — rewritten as plain `.mjs` on VitePress, without the Mermaid viewer, the custom theme, and the jsdom fragment gate; Markdown content stays in `docs/` and the projector derives everything else.
 
 ## Origin and license
 

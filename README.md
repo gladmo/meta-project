@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-A scaffold for repositories built with AI agents: layered standing orders ([AGENTS.md](AGENTS.md)), tiered bilingual documentation with word budgets, RFC-style decision records ([Agent Notes](.agents/notes/README.md)), on-demand [skills](.agents/skills/pre-push-checks/SKILL.md), and zero-dependency verification [gates](scripts/run-gates.mjs) — distilled from [deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) and language-agnostic by design. [TEMPLATE.md](TEMPLATE.md) owns the procedure for applying it to a new project.
+A scaffold for repositories built with AI agents: layered standing orders ([AGENTS.md](AGENTS.md)), tiered bilingual documentation with word budgets, RFC-style decision records ([Agent Notes](.agents/notes/README.md)), on-demand [skills](.agents/skills/pre-push-checks/SKILL.md), zero-dependency verification [gates](scripts/run-gates.mjs), and an optional bilingual documentation website ([website/AGENTS.md](website/AGENTS.md)) — distilled from [deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) and language-agnostic by design. [TEMPLATE.md](TEMPLATE.md) owns the procedure for applying it to a new project.
 
 ## Start here
 

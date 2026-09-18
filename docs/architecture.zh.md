@@ -15,6 +15,7 @@ English | [中文](architecture.zh.md)
 <!-- TODO(template): 每个模块一行——名称、职责、依赖什么。按分层排序：基础在前，入口在后。链接每个模块的归属页面或 README。 -->
 
 ```
+website/     投影 docs/ 双语文档的文档网站（website/AGENTS.md）
 {{MODULE_A}}    {{一行职责}}
 {{MODULE_B}}    {{一行职责}}
 ```

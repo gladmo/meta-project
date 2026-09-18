@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url'
 /** The repository root that owns this scripts directory. */
 export const repoRoot = fileURLToPath(new URL('../..', import.meta.url))
 
-const SKIP_DIRS = new Set(['.git', 'node_modules', '.claude'])
+const SKIP_DIRS = new Set(['.git', 'node_modules', '.claude', '.generated', '.dist', '.cache'])
 
 /** Every Markdown file under root as a sorted list of '/'-separated relative paths. */
 export function markdownFiles(root) {

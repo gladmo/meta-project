@@ -16,6 +16,7 @@
 docs/        Documentation; the tier standard lives in docs/AGENTS.md
 scripts/     Zero-dependency verification gates (scripts/AGENTS.md)
 .agents/     Agent workflows and decision records (.agents/notes/README.md)
+website/     Optional VitePress documentation site (website/AGENTS.md)
 ```
 
 ## Commands
