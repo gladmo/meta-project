@@ -1,0 +1,16 @@
+# Git hooks (lefthook). Keep local hooks fast and narrow; CI owns the
+# exhaustive matrix. Install: `lefthook install` (or wire the same commands
+# into plain .git/hooks). TODO(template): adjust to your layout.
+
+pre-commit:
+  jobs:
+    - name: documentation gates
+      glob: '*.md'
+      run: node scripts/run-gates.mjs
+
+pre-push:
+  jobs:
+    - name: typecheck
+      run: {{TYPECHECK_COMMAND}}
+    # TODO(template): replace {{TYPECHECK_COMMAND}} with your fastest global
+    # static check; push deeper evidence selection to the pre-push-checks skill.
