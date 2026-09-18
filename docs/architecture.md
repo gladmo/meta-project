@@ -15,6 +15,7 @@ The ordered map of {{PROJECT_NAME}}: how the repository composes, which modules 
 <!-- TODO(template): one line per module — name, responsibility, and what it depends on. Order by layering: foundations first, entry points last. Link each module's owning page or README. -->
 
 ```
+benchmarks/  Performance lane: one directory per measured user path (benchmarks/AGENTS.md)
 website/     Bilingual documentation site projected from docs/ pairs (website/AGENTS.md)
 {{MODULE_A}}    {{one-line responsibility}}
 {{MODULE_B}}    {{one-line responsibility}}

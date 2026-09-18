@@ -1,8 +1,8 @@
 # meta-project
 
-English | [中文](README.zh.md)
+[English](README.md) | 中文
 
-一套面向由 AI 智能体参与构建的仓库的脚手架：分层常驻指令（[AGENTS.md](AGENTS.md)）、带字数预算的分层双语文档、RFC 风格的决策记录（[Agent Note](.agents/notes/README.md)）、按需加载的[技能](.agents/skills/pre-push-checks/SKILL.md)、零依赖的验证[门](scripts/run-gates.mjs)，以及可选的双语文档网站（[website/AGENTS.md](website/AGENTS.md)）——结构提炼自 [deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)，天然与语言无关。套用到新项目的完整步骤由 [TEMPLATE.md](TEMPLATE.md) 负责。
+一套面向由 AI 智能体参与构建的仓库的脚手架：分层常驻指令（[AGENTS.md](AGENTS.md)）、带字数预算的分层双语文档、RFC 风格的决策记录（[Agent Note](.agents/notes/README.md)）、按需加载的[技能](.agents/skills/pre-push-checks/SKILL.md)、零依赖的验证[门](scripts/run-gates.mjs)、可选的纯 Node 性能通道（[benchmarks/AGENTS.md](benchmarks/AGENTS.md)），以及可选的双语文档网站（[website/AGENTS.md](website/AGENTS.md)）——结构提炼自 [deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)，天然与语言无关。套用到新项目的完整步骤由 [TEMPLATE.md](TEMPLATE.md) 负责。
 
 ## 从这里开始
 
@@ -17,7 +17,13 @@ English | [中文](README.zh.md)
 node scripts/run-gates.mjs
 ```
 
-一个入口按顺序运行全部文档与决策记录验证门，Node ≥ 18、零依赖；每个门检查什么的清单见 [TEMPLATE.md](TEMPLATE.md)。推送前应收集哪些证据，由 [pre-push-checks](.agents/skills/pre-push-checks/SKILL.md) 负责选取。
+一个入口按顺序运行全部验证门——先对所有被跟踪文件做提交卫生检查，再运行文档与决策记录验证门——Node ≥ 18、零依赖；每个门检查什么的清单见 [TEMPLATE.md](TEMPLATE.md)。推送前应收集哪些证据，由 [pre-push-checks](.agents/skills/pre-push-checks/SKILL.md) 负责选取。
+
+```sh
+node benchmarks/run.mjs
+```
+
+性能通道单独运行，因为测量既慢又对宿主敏感：它在全新进程中为每个用例取样并执行评审过的预算，因此它从不挡在提交钩子前。[benchmarks/README.md](benchmarks/README.zh.md) 负责其命令与校准模型。
 
 ## 来源与许可
 

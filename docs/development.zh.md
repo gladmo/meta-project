@@ -1,6 +1,6 @@
 # 开发指南
 
-English | [中文](development.zh.md)
+[English](development.md) | 中文
 
 搭建教程带新贡献者从前置条件走到验证通过的检出；贡献者参考覆盖日常工作流与 CI 组织。测试策略见 [testing.md](testing.zh.md)；设计依据存放在 [Agent Note](../.agents/notes/README.md)。
 

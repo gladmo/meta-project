@@ -1,6 +1,6 @@
 # 添加模块
 
-English | [中文](adding-a-module.zh.md)
+[English](adding-a-module.md) | 中文
 
 向 {{PROJECT_NAME}} 添加一个模块，并把它接入架构地图、归属参考页与验证门。
 

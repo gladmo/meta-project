@@ -1,6 +1,6 @@
 # 架构
 
-English | [中文](architecture.zh.md)
+[English](architecture.md) | 中文
 
 {{PROJECT_NAME}} 的有序地图：仓库如何组合、有哪些模块、行为在哪里扩展。决策依据存放在 [Agent Note](../.agents/notes/README.md)；模块细节存放在[模块页](modules/README.md)。
 
@@ -15,6 +15,7 @@ English | [中文](architecture.zh.md)
 <!-- TODO(template): 每个模块一行——名称、职责、依赖什么。按分层排序：基础在前，入口在后。链接每个模块的归属页面或 README。 -->
 
 ```
+benchmarks/  性能通道：每条实测用户路径一个目录（benchmarks/AGENTS.md）
 website/     投影 docs/ 双语文档的文档网站（website/AGENTS.md）
 {{MODULE_A}}    {{一行职责}}
 {{MODULE_B}}    {{一行职责}}

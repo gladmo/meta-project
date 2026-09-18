@@ -1,6 +1,6 @@
 # 模块参考
 
-English | [中文](README.zh.md)
+[English](README.md) | 中文
 
 {{PROJECT_NAME}} 中每个模块一页参考：类型、配置与语义。行为叙述归属[架构地图](../architecture.md)；决策依据归属 [Agent Note](../../.agents/notes/README.md)。
 

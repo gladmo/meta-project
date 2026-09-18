@@ -1,6 +1,6 @@
 # 用户指南
 
-English | [中文](index.zh.md)
+[English](index.md) | 中文
 
 面向使用 {{PROJECT_NAME}} 但不修改它的人的产品文档。贡献者流程、决策历史与生成式参考表不属于这里（[层级标准](../AGENTS.md)）。
 

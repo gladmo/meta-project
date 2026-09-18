@@ -1,6 +1,6 @@
 # 贡献指南
 
-English | [中文](CONTRIBUTING.zh.md)
+[English](CONTRIBUTING.md) | 中文
 
 感谢你有兴趣为 {{PROJECT_NAME}} 做贡献！
 

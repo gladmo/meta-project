@@ -16,6 +16,7 @@
 docs/        Documentation; the tier standard lives in docs/AGENTS.md
 scripts/     Zero-dependency verification gates (scripts/AGENTS.md)
 .agents/     Agent workflows and decision records (.agents/notes/README.md)
+benchmarks/  Optional performance lane: one directory per measured user path (benchmarks/AGENTS.md)
 website/     Optional VitePress documentation site (website/AGENTS.md)
 ```
 
@@ -29,12 +30,13 @@ website/     Optional VitePress documentation site (website/AGENTS.md)
 {{LINT_COMMAND}}             # lint
 {{TYPECHECK_COMMAND}}        # typecheck / static analysis
 {{BUILD_COMMAND}}            # build
-node scripts/run-gates.mjs   # documentation and decision-record gates
+node scripts/run-gates.mjs   # commit hygiene, documentation, and decision-record gates
+node benchmarks/run.mjs      # performance lane: fresh processes, not part of run-gates
 ```
 
 ### Run relevant checks locally
 
-Before pushing, follow [pre-push-checks](.agents/skills/pre-push-checks/SKILL.md) and report only the commands you ran. Match evidence to the surface: focused behavior tests for code, `run-gates` for docs and Agent Notes, built smokes for published artifacts, real-API e2e for external providers. Never default to the full suite; CI owns exhaustive coverage and the platform matrix.
+Before pushing, follow [pre-push-checks](.agents/skills/pre-push-checks/SKILL.md) and report only the commands you ran. Match evidence to the surface: focused behavior tests for code, the owning case under [benchmarks/](benchmarks/AGENTS.md) for a measured path, `run-gates` for docs and Agent Notes, built smokes for published artifacts, real-API e2e for external providers. Never default to the full suite; CI owns exhaustive coverage and the platform matrix.
 
 ## Secrets / .env
 
@@ -54,7 +56,7 @@ Never commit credentials. Tests that require secrets self-skip when they are abs
 - **Docs accompany every code change:** update the affected README and reference docs in the same commit ([standard](docs/AGENTS.md)).
 - **Comments state contracts, not reasoning transcripts.** Keep behavior, failure, timing, ownership, and safe-use facts; delete narration and code restatement.
 - TODO markers: `FIXME` / `TODO` / `XXX` by urgency ([semantics](docs/development.md)).
-- Files end with exactly one trailing newline; the whitespace check gates it.
+- Files end with exactly one trailing newline.
 
 ## Decision records and skills
 

@@ -4,13 +4,15 @@
 
 pre-commit:
   jobs:
-    - name: documentation gates
-      glob: '*.md'
+    # No glob: every commit — code or docs — runs the full gate suite.
+    - name: verification gates
       run: node scripts/run-gates.mjs
 
 pre-push:
   jobs:
     - name: typecheck
-      run: {{TYPECHECK_COMMAND}}
+      # Quoted so the file parses before the template is filled; unfilled, the
+      # literal command fails loud instead of silently skipping the check.
+      run: '{{TYPECHECK_COMMAND}}'
     # TODO(template): replace {{TYPECHECK_COMMAND}} with your fastest global
     # static check; push deeper evidence selection to the pre-push-checks skill.

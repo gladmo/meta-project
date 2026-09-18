@@ -1,6 +1,6 @@
 # Agent Note 决策记录
 
-English | [中文](README.zh.md)
+[English](README.md) | 中文
 
 这里只存放一类设计文档。**Agent Note** 记录影响本代码库的决策或提案——*为什么*与*放弃了什么*，即代码和文档无法承载的部分。本文件定义 note 的存放位置、撰写时机与文件内格式。
 
@@ -99,4 +99,4 @@ Status: <status>
 
 ### 中文对应文件
 
-`.zh.md` 对应文件与英文版逐小节镜像；机器校验的头部记号（`# Agent Note: ` 与 `Status:` 行）逐字保留英文。`verify-agent-note-format` 检查两种语言；`verify-doc-pairs` 检查成对性。
+`.zh.md` 对应文件与英文版逐小节镜像；机器校验的记号（`# Agent Note: `、`Status:` 行，以及 `verify-agent-note-format` 要求的小节标题）逐字保留英文。`verify-agent-note-format` 检查两种语言；`verify-doc-pairs` 检查成对性。

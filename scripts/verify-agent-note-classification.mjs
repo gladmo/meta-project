@@ -3,7 +3,7 @@
 // class set, notes sit exactly one class deep, and note filenames carry the
 // first-proposed date. An empty tree is valid for a fresh project.
 
-import { readdirSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { repoRoot } from './lib/md.mjs'
 
@@ -16,7 +16,9 @@ let failures = 0
 const fail = (msg) => { console.error(`verify-agent-note-classification: ${msg}`); failures++ }
 
 const notesDir = join(repoRoot, '.agents', 'notes')
-for (const ent of readdirSync(notesDir, { withFileTypes: true })) {
+const notesPresent = existsSync(notesDir)
+if (!notesPresent) fail('missing .agents/notes tree; copy it from the scaffold or drop this gate')
+for (const ent of notesPresent ? readdirSync(notesDir, { withFileTypes: true }) : []) {
   if (!ent.isDirectory()) {
     if (!ROOT_FILES.has(ent.name)) fail(`unexpected file at notes root: ${ent.name}`)
     continue

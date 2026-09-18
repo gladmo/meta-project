@@ -1,6 +1,6 @@
 # 复盘
 
-English | [中文](README.zh.md)
+[English](README.md) | 中文
 
 {{PROJECT_NAME}} 的编号事故记录。复盘是唯一允许叙事的文档层级：它讲述到达用户或 CI 的缺陷的故事，确立根因，并转化为持久修复。
 

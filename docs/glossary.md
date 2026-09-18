@@ -12,6 +12,7 @@ The closed vocabulary this repository uses in documentation, code review, and de
 | Tier | One row of the documentation taxonomy; each fact has exactly one owning tier ([standard](AGENTS.md)) |
 | Agent Note | An RFC-style decision record with lifecycle, classification, and mandatory alternatives ([rules](../.agents/notes/README.md)) |
 | Gate | A deterministic zero-dependency check under `scripts/`, aggregated by `run-gates` |
+| Benchmark case | One measured user path under `benchmarks/`, owned by a `.bench.mjs` case and the worker it measures ([rules](../benchmarks/AGENTS.md)) |
 | Skill | A reusable agent workflow under `.agents/skills/` with YAML frontmatter |
 | Postmortem | A numbered incident record; the only tier where narrative belongs ([rules](postmortem/README.md)) |
 | Supersession check | The search for older Agent Notes a new note replaces, required on every new note ([rule](../.agents/notes/AGENTS.md)) |

@@ -29,6 +29,7 @@ Supply a base verified from current remote state; do not guess. After retarget o
 There is no universal local baseline beyond the hooks. Every behavior change needs the narrowest available check that would fail for its regression; add broader checks only for surfaces the diff actually reaches.
 
 - **Code behavior:** run the owning test file or the focused test name; adjacent tests when a shared contract changes.
+- **Measured user paths:** run the owning case, `node benchmarks/run.mjs <case>`, when the diff touches a path the lane measures. Never relax a budget, and never re-record an expectation, to make a push pass.
 - **Documentation, Agent Notes, or decision records:** run `node scripts/run-gates.mjs`.
 - **User- or model-visible output:** run the snapshot or expected-output test that owns the output.
 - **Package manifests, public exports, or build configuration:** run the build and the owning built-artifact smoke.

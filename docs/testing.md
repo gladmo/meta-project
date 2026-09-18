@@ -9,6 +9,7 @@ Evidence matches the surface: the narrowest check that would fail for the regres
 <!-- TODO(template): define the tiers this repository actually runs — for example unit, integration, snapshot/expected-output, and real-API e2e — and which surface each tier owns. Delete unused tiers. -->
 
 - **Unit:** behavior of one module in isolation; fast and deterministic.
+- **Performance:** `benchmarks/` holds required budgets for measured user paths; each case samples in fresh processes and enforces reviewed constants ([rules](../benchmarks/AGENTS.md)).
 - **Snapshot / expected output:** user- or model-visible output pinned through recorded fixtures.
 - **End-to-end:** real external providers; self-skip without credentials.
 

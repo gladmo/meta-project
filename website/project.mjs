@@ -480,18 +480,6 @@ function indexAliasRoute(route) {
 }
 
 /**
- * Site-relative Markdown files the raw-Markdown projection emits: every
- * route, plus one parent-level alias per index route.
- *
- * @param pages Pages to project, defaulting to the publication manifest.
- * @returns The emitted paths, routes first.
- */
-export function rawMarkdownFiles(pages = docsPages) {
-  const aliases = pages.map(page => indexAliasRoute(page.route)).filter(alias => alias !== undefined)
-  return [...pages.map(page => page.route), ...aliases]
-}
-
-/**
  * Emit the raw-Markdown twin of every published route into a built site, so
  * static hosting serves the page's URL, minus any trailing slash, plus `.md`
  * as plain Markdown. Each index route also emits a parent-level alias twin,

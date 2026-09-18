@@ -31,7 +31,6 @@ function mirroredPages(pages) {
       : value
     return {
       locale,
-      contentLocale: localized(page.contentLocale),
       source: localized(page.source),
       route: locale === 'root' ? page.route : `en/${page.route}`,
       label: page.label[locale],
@@ -56,7 +55,6 @@ function pairedPages(pages) {
     return {
       ...page,
       source: { root: chineseSource, en: page.source },
-      contentLocale: { root: 'zh-CN', en: 'en-US' },
       sourceAliases: {
         root: [...sharedAliases, page.source],
         en: [...sharedAliases, chineseSource],

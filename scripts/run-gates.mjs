@@ -1,6 +1,8 @@
-// Aggregator: run every documentation gate sequentially. Usage:
-//   node scripts/run-gates.mjs            # all gates
-//   node scripts/run-gates.mjs <gate>     # one gate, e.g. verify-md-wrap
+// Aggregator: run every gate sequentially — commit hygiene first (it covers
+// every tracked file), then the documentation and decision-record gates.
+// Usage:
+//   node scripts/run-gates.mjs                # all gates
+//   node scripts/run-gates.mjs <gate> [...]   # the named gates, in order
 
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
@@ -8,6 +10,7 @@ import { fileURLToPath } from 'node:url'
 import { repoRoot } from './lib/md.mjs'
 
 const GATES = [
+  'verify-commit-hygiene',
   'verify-md-links',
   'verify-md-wrap',
   'verify-doc-pairs',
@@ -16,7 +19,7 @@ const GATES = [
   'verify-agent-note-classification',
 ]
 
-const selected = process.argv.length > 2 ? [process.argv[2]] : GATES
+const selected = process.argv.slice(2).length > 0 ? process.argv.slice(2) : GATES
 for (const gate of selected) {
   if (!GATES.includes(gate)) {
     console.error(`run-gates: unknown gate "${gate}"; known gates: ${GATES.join(', ')}`)

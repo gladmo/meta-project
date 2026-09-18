@@ -1,6 +1,6 @@
 # 操作手册
 
-English | [中文](README.zh.md)
+[English](README.md) | 中文
 
 {{PROJECT_NAME}} 中常见变更的分步流程。每份指南指向单一结果的编号路径；每份指南以一个命令真实存在的验证步骤收尾。设计依据不放在这里——链接拥有该决策的 [Agent Note](../../.agents/notes/README.md)。
 

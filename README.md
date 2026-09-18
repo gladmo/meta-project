@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-A scaffold for repositories built with AI agents: layered standing orders ([AGENTS.md](AGENTS.md)), tiered bilingual documentation with word budgets, RFC-style decision records ([Agent Notes](.agents/notes/README.md)), on-demand [skills](.agents/skills/pre-push-checks/SKILL.md), zero-dependency verification [gates](scripts/run-gates.mjs), and an optional bilingual documentation website ([website/AGENTS.md](website/AGENTS.md)) — distilled from [deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) and language-agnostic by design. [TEMPLATE.md](TEMPLATE.md) owns the procedure for applying it to a new project.
+A scaffold for repositories built with AI agents: layered standing orders ([AGENTS.md](AGENTS.md)), tiered bilingual documentation with word budgets, RFC-style decision records ([Agent Notes](.agents/notes/README.md)), on-demand [skills](.agents/skills/pre-push-checks/SKILL.md), zero-dependency verification [gates](scripts/run-gates.mjs), an optional plain-Node performance lane ([benchmarks/AGENTS.md](benchmarks/AGENTS.md)), and an optional bilingual documentation website ([website/AGENTS.md](website/AGENTS.md)) — distilled from [deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) and language-agnostic by design. [TEMPLATE.md](TEMPLATE.md) owns the procedure for applying it to a new project.
 
 ## Start here
 
@@ -17,7 +17,13 @@ A scaffold for repositories built with AI agents: layered standing orders ([AGEN
 node scripts/run-gates.mjs
 ```
 
-One entrypoint runs every documentation and decision-record gate in order, on Node ≥ 18 with no dependencies; the table of what each gate checks lives in [TEMPLATE.md](TEMPLATE.md). The evidence to gather before a push is selected by [pre-push-checks](.agents/skills/pre-push-checks/SKILL.md).
+One entrypoint runs every gate in order — commit hygiene over all tracked files, then the documentation and decision-record gates — on Node ≥ 18 with no dependencies; the table of what each gate checks lives in [TEMPLATE.md](TEMPLATE.md). The evidence to gather before a push is selected by [pre-push-checks](.agents/skills/pre-push-checks/SKILL.md).
+
+```sh
+node benchmarks/run.mjs
+```
+
+The performance lane is separate because measurement is slow and host-sensitive: it samples every case in fresh processes and enforces reviewed budgets, so it never gates a commit hook. [benchmarks/README.md](benchmarks/README.md) owns its commands and calibration model.
 
 ## Origin and license
 

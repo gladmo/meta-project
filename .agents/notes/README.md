@@ -99,4 +99,4 @@ Moving a file between lifecycle folders means updating the `Status:` line and re
 
 ### Chinese counterparts
 
-A `.zh.md` counterpart mirrors its English sibling section-for-section; the machine-checked header tokens (`# Agent Note: ` and the `Status:` line) stay in English verbatim. `verify-agent-note-format` checks both languages; `verify-doc-pairs` checks the pairing.
+A `.zh.md` counterpart mirrors its English sibling section-for-section; the machine-checked tokens (`# Agent Note: `, the `Status:` line, and the section headings `verify-agent-note-format` requires) stay in English verbatim. `verify-agent-note-format` checks both languages; `verify-doc-pairs` checks the pairing.
