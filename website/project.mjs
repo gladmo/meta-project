@@ -194,7 +194,7 @@ function repositorySlug() {
 
 function githubTarget(absPath, line, suffix, repositoryRef, repoRoot, image) {
   const path = repoPath(absPath, repoRoot)
-  if (image) return `https://raw.githubusercontent.com/${repositorySlug()}/${repositoryRef}/${path}${suffix}`
+  if (image) return `${site.rawFileBase}/${repositorySlug()}/${repositoryRef}/${path}${suffix}`
   const kind = lstatSync(absPath).isDirectory() ? 'tree' : 'blob'
   const lineSuffix = line === undefined ? suffix : `#L${line}`
   return `${site.repositoryUrl}/${kind}/${repositoryRef}/${path}${lineSuffix}`
@@ -228,13 +228,16 @@ export function rewriteMarkdown(source, options) {
       ? options.locale === 'root' ? 'en' : 'root'
       : options.locale
     const page = published.get(targetPath)?.get(targetLocale)
-    const nextUrl = page !== undefined
-      ? routeTarget(options.route, page.route, suffix)
-      : node.type === 'image' && options.placeImage !== undefined
-        // The suffix rides along exactly as the repository keeps it: an SVG
-        // view fragment or a Vite query changes what the reference means.
-        ? `${options.placeImage(absPath)}${suffix}`
-        : githubTarget(absPath, line, suffix, options.repositoryRef, options.repoRoot, node.type === 'image')
+    let nextUrl
+    if (page !== undefined) {
+      nextUrl = routeTarget(options.route, page.route, suffix)
+    } else if (node.type === 'image' && options.placeImage !== undefined) {
+      // The suffix rides along exactly as the repository keeps it: an SVG
+      // view fragment or a Vite query changes what the reference means.
+      nextUrl = `${options.placeImage(absPath)}${suffix}`
+    } else {
+      nextUrl = githubTarget(absPath, line, suffix, options.repositoryRef, options.repoRoot, node.type === 'image')
+    }
 
     const destination = markdownDestination(source, node)
     replacements.push({ start: destination.start, end: destination.end, value: nextUrl })
@@ -298,17 +301,26 @@ export function projectedPageContent(markdown, _page) {
   return withoutRepositoryChrome(markdown)
 }
 
+/** realpath of each repoRoot seen, so the per-image fence check does not repeat the synchronous resolution. */
+const realRoots = new Map()
+
 /**
  * The repository file one image reference resolves to, or `undefined` when the
  * target is not a local file this build may publish. Publication copies the
  * bytes into the site, so a reference escaping the repository — or a symlink
  * pointing out of the tree — would put a build-machine file on the site;
  * `existsSync` alone, which is all link resolution needs, does not answer
- * that.
+ * that. Both sides are realpath'd, so a checkout reached through a symlinked
+ * path (a linked worktree, /tmp on macOS) compares equal to its files.
  */
 export function publishableImage(absPath, repoRoot) {
   const real = realpathSync(absPath)
-  const inside = real === repoRoot || real.startsWith(`${repoRoot}${sep}`)
+  let realRoot = realRoots.get(repoRoot)
+  if (realRoot === undefined) {
+    realRoot = realpathSync(repoRoot)
+    realRoots.set(repoRoot, realRoot)
+  }
+  const inside = real === realRoot || real.startsWith(`${realRoot}${sep}`)
   return inside && statSync(real).isFile() ? real : undefined
 }
 
@@ -507,25 +519,32 @@ export function emitRawMarkdownPages(outDir) {
 /**
  * Raw Markdown served for one site route.
  *
- * Dev-server counterpart of {@link emitRawMarkdownPages}: images are not
- * copied because the generated tree already serves them beside the page.
+ * Dev-server counterpart of {@link emitRawMarkdownPages}: an index route also
+ * serves its parent-level alias twin (`reference/cookbook.md` for
+ * `reference/cookbook/index.md`), projected over the alias route so its
+ * relative links stay as correct as the emitted twin's. The generated tree
+ * serves an image only beside the canonical page, so image links carry the
+ * hop from the requested route's directory back to the canonical page's —
+ * empty for a canonical route, whose links stay exactly as before.
  *
- * @param route Manifest route, including the `.md` suffix.
- * @returns The projected page, or `undefined` when the manifest does not publish the route.
+ * @param route Manifest route or the parent-level alias of an index route, including the `.md` suffix.
+ * @returns The projected page, or `undefined` when the manifest publishes neither.
  */
 export function rawMarkdownRoute(route) {
   const context = defaultProjectionContext()
   const page = context.pages.find(candidate => candidate.route === route)
+    ?? context.pages.find(candidate => indexAliasRoute(candidate.route) === route)
   if (page === undefined) return undefined
   const markdown = readFileSync(resolve(context.repoRoot, page.source), 'utf8')
+  const imageDir = posix.relative(posix.dirname(route), posix.dirname(page.route))
   return rawMarkdownPageContent(rewriteMarkdown(markdown, {
     sourcePath: page.source,
     locale: page.locale,
-    route: page.route,
+    route,
     pages: context.pages,
     repoRoot: context.repoRoot,
     repositoryRef: context.repositoryRef,
-    placeImage: absPath => `./${encodeURI(basename(absPath))}`,
+    placeImage: absPath => `./${encodeURI(posix.join(imageDir, basename(absPath)))}`,
   }), page.source)
 }
 

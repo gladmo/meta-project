@@ -41,17 +41,32 @@ function aggregate(values) {
   return { min: Math.min(...values), median: median(values), max: Math.max(...values) }
 }
 
+/**
+ * Why one sample's outcome is unusable, or `undefined` when it reported.
+ * @param {number} attempt Sample number, for the failure message.
+ * @param {{exitCode: number|null, signal: string|null, timedOut: boolean, report: object|undefined}} run Sample outcome.
+ * @returns {string|undefined} The failure description, or `undefined`.
+ */
+function sampleProblem(attempt, run) {
+  if (run.timedOut) return `sample ${attempt} exceeded its ${WORKER_TIMEOUT_MS} ms deadline`
+  if (run.exitCode !== 0) return `sample ${attempt} exited with ${String(run.exitCode)} (signal ${run.signal ?? 'none'})`
+  if (run.report === undefined) return `sample ${attempt} reported no JSON line`
+  return undefined
+}
+
 const failures = []
 const samples = []
 for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
-  const run = await runBenchmarkWorker({ worker: WORKER, timeoutMs: WORKER_TIMEOUT_MS, exposeGc: true })
-  const problem = run.timedOut
-    ? `sample ${attempt} exceeded its ${WORKER_TIMEOUT_MS} ms deadline`
-    : run.exitCode !== 0
-      ? `sample ${attempt} exited with ${String(run.exitCode)} (signal ${run.signal ?? 'none'})`
-      : run.report === undefined
-        ? `sample ${attempt} reported no JSON line`
-        : undefined
+  // A sample that cannot run — spawn failure or an unparsable report line —
+  // is one failed sample, not a crash that would lose every earlier failure.
+  let run
+  try {
+    run = await runBenchmarkWorker({ worker: WORKER, timeoutMs: WORKER_TIMEOUT_MS, exposeGc: true })
+  } catch (error) {
+    failures.push(`sample ${attempt} could not run: ${String(error)}`)
+    continue
+  }
+  const problem = sampleProblem(attempt, run)
   if (problem !== undefined) {
     failures.push(problem)
     if (run.stderr.trim() !== '') console.error(run.stderr.trim())

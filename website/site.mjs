@@ -14,6 +14,8 @@ export const site = {
   description: '面向 AI 智能体协作仓库的脚手架',
   /** Canonical public repository URL; edit links and link fallbacks build on it. */
   repositoryUrl: 'https://github.com/gladmo/meta-project',
+  /** Base URL of the repository host's raw-file endpoint, for image links the site does not publish; kept beside `repositoryUrl` so switching forges moves both. */
+  rawFileBase: 'https://raw.githubusercontent.com',
   /** Public ref the site links repository files against; DOCS_REPOSITORY_REF overrides it per build. */
   repositoryRef: 'master',
   /** Site base path with leading and trailing slashes; DOCS_BASE overrides it per build. */

@@ -1,2 +1,4 @@
-allowBuilds:
-  esbuild: false
+# esbuild's install script downloads a platform binary its optional
+# @esbuild/* packages already carry; skip it instead of letting pnpm flag it.
+ignoredBuiltDependencies:
+  - esbuild

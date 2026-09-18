@@ -23,9 +23,8 @@ const locales = ['root', 'en']
 /** Mirror one source-backed entry into both locale route trees. */
 function mirroredPages(pages) {
   return pages.flatMap(page => locales.map((locale) => {
-    const aliases = page.sourceAliases === undefined
-      ? []
-      : Array.isArray(page.sourceAliases) ? page.sourceAliases : (page.sourceAliases[locale] ?? [])
+    const rawAliases = page.sourceAliases ?? []
+    const aliases = Array.isArray(rawAliases) ? rawAliases : (rawAliases[locale] ?? [])
     const localized = (value) => typeof value === 'object' && value !== null && !Array.isArray(value)
       ? value[locale]
       : value
@@ -116,14 +115,26 @@ const reference = pairedPages([
 ])
 
 /**
+ * Per-locale module facts: one entry per sidebar collection, with the
+ * navigation label and the route prefix its pages live under. This is the
+ * single source — the navigation bar and sidebar mapping in the VitePress
+ * configuration read it directly, and `localeCollections` (which the llms.txt
+ * index reads) derives from it, so a new collection lands in every surface
+ * together. A collection must hold at least one page before it can be
+ * declared here.
+ */
+export const localeModules = {
+  root: [{ label: '参考', collection: 'zh-reference', prefix: '/reference/' }],
+  en: [{ label: 'Reference', collection: 'en-reference', prefix: '/en/reference/' }],
+}
+
+/**
  * Sidebar collections of each locale, in the order the site's navigation
- * presents them. The navigation bar and the llms.txt index both read this
- * sequence, so a new collection lands in both surfaces together. A collection
- * must hold at least one page before it can be declared here.
+ * presents them; derived from `localeModules`, never maintained separately.
  */
 export const localeCollections = {
-  root: ['zh-reference'],
-  en: ['en-reference'],
+  root: localeModules.root.map(module => module.collection),
+  en: localeModules.en.map(module => module.collection),
 }
 
 /** A sidebar group, matched to pages by `label`; `collapsed` renders it collapsed until active. */

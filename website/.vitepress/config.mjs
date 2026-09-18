@@ -4,7 +4,7 @@ import { writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { site } from '../site.mjs'
-import { landingLink, orderedPages, routeLink, sectionSpec } from '../docs.mjs'
+import { landingLink, localeModules, orderedPages, routeLink, sectionSpec } from '../docs.mjs'
 import { docsSourceFiles, emitRawMarkdownPages, llmsTxt, projectDocs, rawMarkdownRoute, resolveRepositoryRef } from '../project.mjs'
 
 projectDocs()
@@ -32,22 +32,22 @@ function sidebar(locale, collection) {
   })
 }
 
-/**
- * Per-locale module facts shared by the navigation bar and the sidebar
- * mapping: one entry per sidebar collection, with the route prefix its pages
- * live under. A new manifest collection needs one entry here.
- */
-const modules = {
-  root: [{ label: '参考', collection: 'zh-reference', prefix: '/reference/' }],
-  en: [{ label: 'Reference', collection: 'en-reference', prefix: '/en/reference/' }],
-}
-
 function watchCanonicalDocs(server) {
   const sources = docsSourceFiles()
   server.watcher.add(sources)
   server.watcher.on('change', (changed) => {
     if (!sources.includes(changed)) return
-    projectDocs()
+    try {
+      projectDocs()
+    } catch (error) {
+      // A mid-edit source — a staged unlink, an image swapped under the
+      // watcher, unclosed frontmatter — makes the projection throw; the dev
+      // server stays up and reports the cause instead of crashing, so the
+      // next successful save recovers without a restart.
+      server.config.logger.error(
+        `website: re-projection failed for ${changed}: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
   })
 }
 
@@ -101,8 +101,18 @@ function escapeVueInterpolation(html) {
   return html.replaceAll('{{', '&#123;&#123;').replaceAll('}}', '&#125;&#125;')
 }
 
-/** Site base path, carrying the leading and trailing slashes VitePress requires. */
-const base = process.env.DOCS_BASE ?? site.base
+/**
+ * Site base path with the leading and trailing slashes VitePress requires;
+ * a bare override like `DOCS_BASE=docs` must not corrupt head hrefs or the
+ * raw-Markdown route stripping, so any override is normalized here — the
+ * single place `DOCS_BASE` is read.
+ */
+function normalizeBase(value) {
+  const trimmed = String(value).trim().replace(/^\/+|\/+$/g, '')
+  return trimmed === '' ? '/' : `/${trimmed}/`
+}
+
+const base = normalizeBase(process.env.DOCS_BASE ?? site.base)
 
 /** Site identity shared by the VitePress configuration and the llms.txt index. */
 const siteIdentity = {
@@ -113,20 +123,27 @@ const siteIdentity = {
 /**
  * GitHub edit link for the canonical source a page was projected from.
  *
- * VitePress serializes `editLink.pattern` into the client build and re-evals
- * it there, so it must be self-contained: the repository URL and ref are
- * interpolated into the function body at configuration time instead of
- * closing over this module.
+ * VitePress carries `themeConfig` into the client by embedding each
+ * function's source and re-evaluating it with `new Function` there
+ * (`serializeFunctions` in its Node build), so a closure over this module
+ * would arrive as a dangling reference: the pattern must be self-contained,
+ * with the repository URL and ref interpolated into the function body at
+ * configuration time. The prefix validation keeps that interpolation a
+ * plain string even if `repositoryUrl` or `DOCS_REPOSITORY_REF` ever grows
+ * a quoting or template-syntax character.
  *
- * @throws When a projected page lacks its `editSource` frontmatter.
+ * @throws When the edit-link prefix is not a plain URL, or a projected page lacks its `editSource` frontmatter.
  */
 function editLinkPattern() {
-  const prefix = JSON.stringify(`${site.repositoryUrl}/edit/${resolveRepositoryRef(process.env)}/`)
+  const prefix = `${site.repositoryUrl}/edit/${resolveRepositoryRef(process.env)}/`
+  if (!/^https?:\/\/[^\s'"`\\<>]*$/.test(prefix)) {
+    throw new Error(`website/config: edit-link prefix is not a plain URL: ${prefix}`)
+  }
   return new Function('page', `
     const frontmatter = page.frontmatter
     const editSource = typeof frontmatter === 'object' && frontmatter !== null ? Reflect.get(frontmatter, 'editSource') : undefined
     if (typeof editSource !== 'string') throw new Error('Projected documentation page has no editSource frontmatter.')
-    return ${prefix} + editSource
+    return ${JSON.stringify(prefix)} + editSource
   `)
 }
 
@@ -152,10 +169,10 @@ export default {
       label: '简体中文',
       lang: 'zh-CN',
       themeConfig: {
-        nav: modules.root.map(({ label, collection, prefix }) => (
+        nav: localeModules.root.map(({ label, collection, prefix }) => (
           { text: label, link: landingLink('root', collection), activeMatch: `^${prefix}` }
         )),
-        sidebar: Object.fromEntries(modules.root.map(({ collection, prefix }) => [prefix, sidebar('root', collection)])),
+        sidebar: Object.fromEntries(localeModules.root.map(({ collection, prefix }) => [prefix, sidebar('root', collection)])),
         editLink: { pattern: editLinkPattern(), text: '在 GitHub 上编辑此页' },
         outline: { label: '本页目录' },
         docFooter: { prev: '上一篇', next: '下一篇' },
@@ -173,10 +190,10 @@ export default {
       lang: 'en-US',
       link: '/en/',
       themeConfig: {
-        nav: modules.en.map(({ label, collection, prefix }) => (
+        nav: localeModules.en.map(({ label, collection, prefix }) => (
           { text: label, link: landingLink('en', collection), activeMatch: `^${prefix}` }
         )),
-        sidebar: Object.fromEntries(modules.en.map(({ collection, prefix }) => [prefix, sidebar('en', collection)])),
+        sidebar: Object.fromEntries(localeModules.en.map(({ collection, prefix }) => [prefix, sidebar('en', collection)])),
         editLink: { pattern: editLinkPattern(), text: 'Edit this page on GitHub' },
         outline: { label: 'On this page' },
         docFooter: { prev: 'Previous', next: 'Next' },

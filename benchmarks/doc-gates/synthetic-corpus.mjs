@@ -93,25 +93,43 @@ function decoy() {
 }
 
 /**
+ * Maximum corpus files written concurrently. Each `writeFile` holds a file
+ * descriptor for its whole open→write→close span and the promises in one
+ * batch all open before any closes, so this must stay well under the lowest
+ * default fd ulimit (256 on macOS and common CI containers).
+ */
+const WRITE_CONCURRENCY = 64
+
+/**
  * Write the corpus into a root the caller owns.
+ *
+ * Every write is independent, so they run in bounded concurrent batches and
+ * each corpus directory is created once; this happens outside the measured
+ * interval.
  * @param {string} root Absolute path to the caller's private directory.
- * @returns {Promise<{files: number, lines: number}>} Written pair count and total line count.
+ * @returns {Promise<{files: number, lines: number}>} Written corpus file count (pairs × 2; the ignored decoys are not counted) and total line count.
  */
 export async function writeSyntheticCorpus(root) {
+  for (const tier of new Set(TIERS)) {
+    await mkdir(join(root, tier), { recursive: true })
+  }
+  const pending = []
   let lines = 0
   for (let index = 0; index < DOCUMENT_PAIRS; index++) {
     const directory = join(root, TIERS[index % TIERS.length])
-    await mkdir(directory, { recursive: true })
     for (const [suffix, chinese] of [['.md', false], ['.zh.md', true]]) {
       const text = document(index, chinese)
       lines += text.split('\n').length - 1
-      await writeFile(join(directory, `doc-${pad(index)}${suffix}`), text)
+      pending.push([join(directory, `doc-${pad(index)}${suffix}`), text])
     }
   }
   for (const relative of DECOYS) {
     const path = join(root, relative)
     await mkdir(dirname(path), { recursive: true })
-    await writeFile(path, decoy())
+    pending.push([path, decoy()])
+  }
+  for (let start = 0; start < pending.length; start += WRITE_CONCURRENCY) {
+    await Promise.all(pending.slice(start, start + WRITE_CONCURRENCY).map(([path, text]) => writeFile(path, text)))
   }
   return { files: DOCUMENT_PAIRS * 2, lines }
 }

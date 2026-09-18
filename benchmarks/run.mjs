@@ -7,11 +7,11 @@
 //   node benchmarks/run.mjs --list       list discovered cases, run nothing
 //   node benchmarks/run.mjs --json       emit one JSON document instead of the summary
 
-import { spawn } from 'node:child_process'
 import { readdirSync } from 'node:fs'
 import { basename, dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { environmentFacts } from './support/environment.mjs'
+import { lastReportLine, spawnNodeCollected } from './support/worker.mjs'
 
 /** The benchmarks tree this runner owns. */
 const BENCHMARKS_ROOT = fileURLToPath(new URL('.', import.meta.url))
@@ -19,8 +19,14 @@ const BENCHMARKS_ROOT = fileURLToPath(new URL('.', import.meta.url))
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
 /** Directories that never hold cases. */
 const SKIP_DIRS = new Set(['node_modules', 'support'])
-/** Deadline for one case, including every sample it takes; a stuck case is killed. */
-const CASE_TIMEOUT_MS = 300_000
+/**
+ * Deadline for one case, including every sample it takes; a stuck case is
+ * killed. Must exceed each case's total worst-case sample time with headroom
+ * for corpus synthesis, startup, and cleanup, so a slow case still prints its
+ * own failure detail instead of dying here: the current worst case is
+ * doc-gates (5 samples × 60 s), sized at 1.25×.
+ */
+const CASE_TIMEOUT_MS = 375_000
 /** One decimal place, for measures whose budget is in milliseconds or MiB. */
 const round = value => Math.round(value * 10) / 10
 
@@ -53,42 +59,18 @@ function caseId(file) {
 
 /**
  * Run one case file, capturing its output and the report line it ends with.
+ * Shares the lane's spawn-with-deadline core with the per-sample worker
+ * launcher; a spawn failure is folded into `stderr` so a case that could not
+ * start reads as an ordinary failed case.
  * @param {string} file Absolute case path.
  * @returns {Promise<{stdout: string, stderr: string, exitCode: number|null, signal: string|null, timedOut: boolean}>} Case outcome.
  */
-function runCase(file) {
-  return new Promise((resolve) => {
-    const env = { ...process.env }
-    delete env['NODE_OPTIONS']
-    delete env['NODE_COMPILE_CACHE']
-    const child = spawn(process.execPath, [file], {
-      cwd: REPO_ROOT,
-      env,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    })
-    let stdout = ''
-    let stderr = ''
-    let timedOut = false
-    const deadline = setTimeout(() => {
-      timedOut = true
-      child.kill('SIGKILL')
-    }, CASE_TIMEOUT_MS)
-    child.stdout.setEncoding('utf8').on('data', (chunk) => { stdout += chunk })
-    child.stderr.setEncoding('utf8').on('data', (chunk) => { stderr += chunk })
-    child.once('error', (error) => {
-      clearTimeout(deadline)
-      resolve({ stdout, stderr: `${stderr}${String(error)}`, exitCode: null, signal: null, timedOut })
-    })
-    child.once('close', (exitCode, signal) => {
-      clearTimeout(deadline)
-      resolve({ stdout, stderr, exitCode, signal, timedOut })
-    })
+async function runCase(file) {
+  const { error, ...outcome } = await spawnNodeCollected([file], {
+    timeoutMs: CASE_TIMEOUT_MS,
+    cwd: REPO_ROOT,
   })
-}
-
-/** The final JSON line a case prints for this runner. */
-function reportLine(stdout) {
-  return stdout.trim().split('\n').findLast(line => line.startsWith('{'))
+  return error === undefined ? outcome : { ...outcome, stderr: `${outcome.stderr}${String(error)}` }
 }
 
 const args = process.argv.slice(2)
@@ -126,7 +108,7 @@ for (const file of selected) {
   const id = caseId(file)
   if (!asJson) console.log(`benchmarks: ${id} — ${relative(BENCHMARKS_ROOT, file)}`)
   const run = await runCase(file)
-  const line = reportLine(run.stdout)
+  const line = lastReportLine(run.stdout)
   let report
   if (line !== undefined) {
     try {

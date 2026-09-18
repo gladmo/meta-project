@@ -19,7 +19,8 @@ const GATES = [
   'verify-agent-note-classification',
 ]
 
-const selected = process.argv.slice(2).length > 0 ? process.argv.slice(2) : GATES
+const args = process.argv.slice(2)
+const selected = args.length > 0 ? args : GATES
 for (const gate of selected) {
   if (!GATES.includes(gate)) {
     console.error(`run-gates: unknown gate "${gate}"; known gates: ${GATES.join(', ')}`)
